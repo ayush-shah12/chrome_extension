@@ -1,0 +1,16 @@
+{
+    "name": "RMP",
+    "version": "1.0.0",
+    "description": "test",
+    "manifest_version": 3,
+    "author": "Ayush Shah",
+    "action":{
+        "default_popup": "index.html",
+        "default_title": "RMP Extension"
+    },
+    "permissions":["activeTab", "scripting"],
+    "cross_origin_embedder_policy": {
+      "value": "require-corp"
+    }
+
+}
