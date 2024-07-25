@@ -3,15 +3,30 @@
 <head>
     <title>RMP Extension</title>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 </head>
 <body>
     <div>
         <form>
             <label for="collegeName">Enter College/University:</label><br>
             <input autocomplete="off" type="text" placeholder="Stony Brook University" id="collegeName" name="collegeName"><br>
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Dropdown button
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="#">Action</a>
+                  <a class="dropdown-item" href="#">Another action</a>
+                  <a class="dropdown-item" href="#">Something else here</a>
+                </div>
+              </div>
             <button type="Highlight Names" id="highlightBtn" name="highlightBtn">Get Ratings!</button>
         </form>
-        <script src="script.js"></script>
     </div>
+
+    <!-- Include jQuery and Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

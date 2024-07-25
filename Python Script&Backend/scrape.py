@@ -30,12 +30,10 @@ def get_school_code():
     return nameToCode.get(school_name)
 
 
-URL = "https://www.ratemyprofessors.com/search/professors/" + get_school_code() + "?q="
-
-driver.get(URL)
+URL = "https://www.ratemyprofessors.com/search/professors/" + str(get_school_code()) + "?q="
 
 
-def get_data():
+def get_data(prof_name):
     # ***********FOR WEBDRIVER FOR CLOUD DEPLOYMENT, IGNORE FOR NOW***********
     # chrome_options = webdriver.ChromeOptions()
     # chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
@@ -43,51 +41,24 @@ def get_data():
     # driver = webdriver.Chrome(service=chrome_service, options=chrome_options)
 
     try:
-        while True:
-            #laods all data first
-            try:
-                # Pagination Button Click Handler
-                button = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.XPATH,
-                                                "//button[@class='Buttons__Button-sc-19xdot-1 PaginationButton__StyledPaginationButton-txi1dr-1 glImpo']"))
-                )
-                button.click()
-            except:
-                break
+        driver.get(URL + prof_name)
 
         # contains individual prof data
-        data = driver.find_elements(By.XPATH,
-                                    "//div[@class='App__Body-aq7j9t-1 bhyGpW']//a[@class='TeacherCard__StyledTeacherCard-syjs0d-0 dLJIlx']")
+        data = driver.find_element(By.XPATH,
+                                   "//div[@class='App__Body-aq7j9t-1 bhyGpW']//a["
+                                   "@class='TeacherCard__StyledTeacherCard-syjs0d-0 dLJIlx']")
 
-        data_list = []
-        for i in data:
-            data_list.append(i.text + ";")
-
-        new_list = []
-        for i in data_list:
-            temp = i.replace('\n', ',')
-            temp_array = temp.split(',')
-            new_list.append({
-                'rating': temp_array[1],
-                'name': temp_array[3],
-                'difficulty': temp_array[8],
-                'department': temp_array[4],
-                'would_take_again': temp_array[6],
-            })
-
-        with open("test.csv", "a", newline='', encoding='utf-8') as csvfile:
-            csv_writer = csv.writer(csvfile)
-            for item in new_list:
-                csv_writer.writerow(
-                    [item["name"], item["rating"], item["difficulty"], item["department"], item["would_take_again"]])
+        info = data.text.split('\n')
+        sending_data = {"name": info[3], "rating": info[1], "num_of_ratings": info[2], "difficulty": info[8],
+                        "department": info[4], "percent_take_again": info[6]}
+        return sending_data
 
     except Exception as e:
-        print("No more pages or an error occurred:", e)
-        driver.quit()
+        print("Professor not Found:", e)
+        return {}
 
     finally:
         driver.quit()
-
 
 def block_popup():
     block = True
@@ -101,36 +72,7 @@ def block_popup():
             pass
 
 
-def get_school_departments():
-    try:
-        # Wait for the input element to be present
-        wait = WebDriverWait(driver, 10)
-        input_element = driver.find_element(By.XPATH,
-                                            "//div[@class=' css-1wa3eu0-placeholder']")
-        input_element.click()
-        options = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "css-1u8e7rt-menu")))
-
-        #parsing options format
-        temp = []
-        for option in options:
-            temp.append(option.text)
-            departments = temp[0].split("\n")
-
-        # await user response place backend call here
-        selected_department = "Computer Science"
-        driver.find_element(By.XPATH, "//*[text()='" + selected_department + "']").click()
-
-        #getting data from selected_department only
-        get_data()
-
-    except Exception as e:
-        print(e)
-
-
-
-block_popup()
-get_school_departments()
-
 if __name__ == "__main__":
     block_popup()
-    get_school_departments()
+    data = get_data("praveen tripathi")
+    print(data)
