@@ -54,10 +54,9 @@ def genComment(comments):
 def get_professor_info():
     prof_first_name = request.args.get('prof_first_name')
     prof_last_name = request.args.get('prof_last_name')
-    school_name = request.args.get('school_name')
+    school_name = request.args.get('school_name').lower()
 
     if set_url(school_name) == "None":
-        print(set_url(school_name))
         return jsonify("ERROR: COULD NOT FIND SCHOOL")
 
     data = asyncio.run(main(set_url(school_name), prof_last_name))
