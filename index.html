@@ -1,32 +1,47 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>RMP Extension</title>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-</head>
-<body>
-    <div>
-        <form>
-            <label for="collegeName">Enter College/University:</label><br>
-            <input autocomplete="off" type="text" placeholder="Stony Brook University" id="collegeName" name="collegeName"><br>
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Dropdown button
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-              </div>
-            <button type="Highlight Names" id="highlightBtn" name="highlightBtn">Get Ratings!</button>
-        </form>
-    </div>
 
-    <!-- Include jQuery and Bootstrap JS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="script.js"></script>
+<head>
+  <title>RMP Extension</title>
+  <meta charset="utf-8">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="libs/css/bootstrap.min.css">
+  <!-- jQuery library -->
+  <script src="libs/jquery.min.js"></script>
+  <!-- Latest compiled JavaScript -->
+  <script src="libs/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    body {
+      width: 400px;  
+      height: 100px; 
+      margin: 0;
+      padding: 10px;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div>
+    <form>
+      <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+          Select School
+        </button>
+        <div id="dropdown-menu" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <option value="" style="cursor: pointer">Close Menu</option>
+        </div>
+      </div>
+      <div>
+        <button type="button" class="btn btn-primary" id="submit">Submit</button>
+      </div>
+      <p id="selected-value">Selected: </p>
+    </form>
+  </div>
+  <script src="schoolName.js"></script>
+  <script src="script.js"></script>
 </body>
+
 </html>

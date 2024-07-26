@@ -8,7 +8,14 @@
         "default_popup": "index.html",
         "default_title": "RMP Extension"
     },
-    "permissions":["activeTab", "scripting"],
+    "host_permissions": ["http://127.0.0.1:5000/*"],
+    "permissions":["activeTab", "declarativeContent", "storage", "scripting"],
+    "content_scripts": [
+   {
+     "matches": ["<all_urls>"],
+      "js": ["script.js"]
+   }],
+   
     "cross_origin_embedder_policy": {
       "value": "require-corp"
     }

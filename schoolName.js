@@ -4034,3 +4034,44 @@ nameToCode = {
 	"Stenberg College" : 6047,
     "Le Cordon Bleu College of Culinary Arts" : 6049,
 }
+
+
+const dropdown = document.getElementById('dropdown-menu');
+
+// Create an option element for each entry in the nameToCode object
+for(const [key, value] of Object.entries(nameToCode)){
+    const optionElement = document.createElement('option');
+    optionElement.value = value;
+    optionElement.textContent = key;
+	optionElement.style.cursor = 'pointer';
+    dropdown.appendChild(optionElement);
+}
+
+// Displays selected school
+dropdown.addEventListener('click', function(event){
+    const a = document.getElementById('selected-value');
+	if(event.target.textContent=="Close Menu"){
+		a.textContent = `No School Selected`;
+		chrome.storage.sync.set({selected_school: null }).then(() => {
+			console.log("Value is set");
+		  });
+	}
+	else
+    	a.textContent = `Selected: ${event.target.textContent}`;
+		chrome.storage.sync.set({ selected_school: event.target.textContent}).then(() => {
+			console.log("Value is set");
+		  });
+});
+
+// Displays selected school if previously selected + syncs acorss sessions
+chrome.storage.sync.get(["selected_school"]).then((result) => {
+	const a = document.getElementById('selected-value');
+	if(result.selected_school!=null){
+		a.textContent = `Selected: ${result.selected_school}`;
+	}
+	else{
+		a.textContent = `No School Selected`;
+	}
+  });
+
+
