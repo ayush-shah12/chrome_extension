@@ -7,19 +7,24 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . .
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Node.js
+RUN apt-get update && apt-get install -y wget gnupg
+RUN wget -q -O - https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
 
 # Install Playwright and its dependencies, including the browsers
-RUN playwright install --with-deps
+RUN pip install --no-cache-dir -r requirements.txt
+RUN npm install -g playwright
 
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+# Set environment variable to ensure Playwright installs browsers in the correct path
+ENV PLAYWRIGHT_BROWSERS_PATH=/usr/lib/playwright
+RUN mkdir -p /usr/lib/playwright
 
-# Make port 8080 available to the world outside this container
-EXPOSE 8080
+# Install Playwright browsers
+RUN npx playwright install --with-deps
 
-# Define environment variable
-ENV PORT 8080
+# Optionally set PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD if you want to skip browser download in further installs
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 # Run Gunicorn to serve the app
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "backend:app", "--workers", "3"]
+CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "backend:app", "--workers", "3"]
