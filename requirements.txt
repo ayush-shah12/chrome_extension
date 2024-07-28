@@ -2,3 +2,4 @@ flask
 playwright
 flask-cors
 gunicorn
+asyncio

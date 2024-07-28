@@ -1,30 +1,19 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use the official Playwright Docker image
+FROM mcr.microsoft.com/playwright/python:v1.21.0-focal
 
-# Set the working directory in the container
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Create directory for the app user
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Copy requirements and install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the application code
 COPY . .
 
-# Install Node.js
-RUN apt-get update && apt-get install -y wget gnupg
-RUN wget -q -O - https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install -y nodejs
-
-# Install Playwright and its dependencies, including the browsers
-RUN pip install --no-cache-dir -r requirements.txt
-RUN npm install -g playwright
-
-# Set environment variable to ensure Playwright installs browsers in the correct path
-ENV PLAYWRIGHT_BROWSERS_PATH=/usr/lib/playwright
-RUN mkdir -p /usr/lib/playwright
-
-# Install Playwright browsers
-RUN npx playwright install --with-deps
-
-# Optionally set PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD if you want to skip browser download in further installs
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-
-# Run Gunicorn to serve the app
-CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "backend:app", "--workers", "3"]
+# Run the application
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "backend:app"]
