@@ -3,6 +3,9 @@ from flask_cors import CORS, cross_origin
 import asyncio
 from playwright.async_api import async_playwright
 from nameToCode import nameToCode
+import subprocess
+
+subprocess.run(["playwright", "install"])
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
