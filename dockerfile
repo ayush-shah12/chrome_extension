@@ -13,6 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install Playwright and its dependencies, including the browsers
 RUN playwright install --with-deps
 
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 # Make port 8080 available to the world outside this container
 EXPOSE 8080
 
