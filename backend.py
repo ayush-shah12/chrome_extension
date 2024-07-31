@@ -4,6 +4,7 @@ import asyncio
 from playwright.async_api import async_playwright
 from nameToCode import nameToCode
 import os
+import requests
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
