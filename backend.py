@@ -3,22 +3,22 @@ from flask_cors import CORS, cross_origin
 import asyncio
 from playwright.async_api import async_playwright
 from nameToCode import nameToCode
-import subprocess
-
-subprocess.run(["playwright", "install"])
+import os
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
 CORS(app)
+
+chrome_binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+chromium_executable_path = os.environ.get("CHROMEDRIVER_PATH")
 
 
 async def main(url, prof_name):
     async with async_playwright() as p:
 
         responses = []
-
-        browser = await p.chromium.launch(headless=True, proxy=None,
-                                          args=['--no-sandbox', '--headless', '--disable-gpu', '--disable-web-security',
+        browser = await p.chromium.launch(executable_path=chromium_executable_path,headless=True, proxy=None,
+                                          args=['--binary={chrome_binary_location}','--no-sandbox', '--headless', '--disable-gpu', '--disable-web-security',
                                                 '--disable-dev-sherlock', '--disable-infobars', '--disable-extensions',
                                                 '--disable-dev-tools'])
         context = await browser.new_context()
@@ -84,5 +84,4 @@ def get_professor_info():
 
 if __name__ == '__main__':
     port = 8080
-    app.run(host='0.0.0.0', port=port)
-
+    app.run(port=port)
