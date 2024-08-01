@@ -1,74 +1,60 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
-from playwright.sync_api import sync_playwright, Playwright
-from nameToCode import nameToCode
-import os
+import asyncio
+from playwright.async_api import async_playwright
+import requests
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
 CORS(app)
 
-chrome_binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-chromium_executable_path = os.environ.get("CHROMEDRIVER_PATH")
 
-browser = None
-context = None
+async def main(url, prof_name):
+    async with async_playwright() as p:
 
-def setup_browser():
-    global browser, context
-    if browser is None:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                executable_path=chromium_executable_path,
-                headless=True,
-                args=[
-                    f'--binary={chrome_binary_location}',
-                    '--no-sandbox',
-                    '--disable-gpu',
-                    '--disable-web-security',
-                    '--disable-dev-shm-usage'
-                ]
-            )
-            context = browser.new_context()
+        responses = []
 
-def close_browser():
-    global browser
-    if browser:
-        browser.close()
-        browser = None
+        browser = await p.chromium.launch(headless=True, proxy=None,
+                                          args=['--no-sandbox', '--headless', '--disable-gpu', '--disable-web-security',
+                                                '--disable-dev-sherlock', '--disable-infobars', '--disable-extensions',
+                                                '--disable-dev-tools'])
+        context = await browser.new_context()
+        page = await context.new_page()
 
+        async def handle_route(route, request):
+            if "graphql" in request.url and request.method == "POST":
+                response = await route.fetch()
+                json_data = await response.json()
+                responses.append(json_data)
+            else:
+                await route.continue_()
 
-def main(url, prof_name):
-    global context
-    responses = []
-    page = context.new_page()
+        await page.route("**/graphql", handle_route)
 
-    def handle_route(route, request):
-        if "graphql" in request.url and request.method == "POST":
-            response = route.fetch()
-            json_data = response.json()
-            responses.append(json_data)
-        else:
-            route.continue_()
+        await page.goto('https://www.ratemyprofessors.com/search/professors/' + str(url) + '?q=' + prof_name)
 
-    page.route("**/graphql", handle_route)
+        await browser.close()
 
-    page.goto('https://www.ratemyprofessors.com/search/professors/' + str(url) + '?q=' + prof_name)
-
-    page.close()
-
-    return responses
+        return responses
 
 
-def set_url(school_name):
-    return nameToCode.get(school_name)
-
-
-def genComment(comments):
+def gen_comment(code, state):
+    if not state:  # To disable comments, switch state to false in gen_comment calls.
+        return "Comments were disabled."
+    comments = []
+    x = requests.get('https://www.ratemyprofessors.com/professor/' + str(code)).text
+    x = x.split('"Comments__StyledComments-dzzyvm-0 gRjWel">')
+    x.pop(0)
+    for y in x:
+        y = y.replace('&#x27;', "'")
+        y = y.replace('&amp;', "and")
+        y = y.split('</div><div class="RatingTags__StyledTags-sc-1boeqx2-0 eLpnFv">')
+        comments.append(y[0])
+    comments = comments[slice(6)]
     if not comments:
         return "No comments were found for this professor."
     else:
-        return "Temporary comment, will add this AI comment later."
+        return comments
 
 
 @app.route('/get_professor_info', methods=['GET'])
@@ -76,12 +62,9 @@ def genComment(comments):
 def get_professor_info():
     prof_first_name = request.args.get('prof_first_name').lower()
     prof_last_name = request.args.get('prof_last_name')
-    school_name = request.args.get('school_name')
+    school_code = request.args.get('school_code')
 
-    if set_url(school_name) is None:
-        return jsonify({'ERROR': 651, 'MESSAGE': "COULD NOT FIND SCHOOL, BAD SCHOOL NAME", })
-
-    data = main(set_url(school_name), prof_last_name)
+    data = asyncio.run(main(school_code, prof_last_name))
 
     list_prof = data[0]['data']['search']['teachers']['edges']
 
@@ -90,21 +73,16 @@ def get_professor_info():
 
     for prof in list_prof:
         # Check if we get an exact match for the first name
-        if prof['node'].get('firstName').lower() == prof_first_name.lower():
-            prof['node']['comment'] = genComment([])
+        if prof['node'].get('firstName').lower() == prof_first_name:
+            prof['node']['comments'] = gen_comment(prof['node'].get('legacyId'), True)
             return jsonify(prof['node'])
         # Check in the instance that the first name was abbreviated to only the first letter
-        if len(prof_first_name) == 1 and prof['node'].get('firstName').lower()[0] == prof_first_name.lower()[0]:
-            prof['node']['comment'] = genComment([])
+        if len(prof_first_name) == 1 and prof['node'].get('firstName').lower()[0] == prof_first_name[0]:
+            prof['node']['comments'] = gen_comment(prof['node'].get('legacyId'), True)
             return jsonify(prof['node'])
     # Otherwise return error.
     return jsonify({'ERROR': 653, 'MESSAGE': "COULD NOT FIND TEACHER, BAD FIRST NAME", })
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
-    try:
-        setup_browser()
-        app.run(host='0.0.0.0', port=port) 
-    finally:
-        close_browser()
+    app.run(debug=True)
