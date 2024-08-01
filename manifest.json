@@ -1,23 +1,17 @@
 {
-    "name": "RMP",
-    "version": "1.0.0",
-    "description": "test",
-    "manifest_version": 3,
-    "author": "Ayush Shah",
-    "action":{
-        "default_popup": "index.html",
-        "default_title": "RMP Extension"
-    },
-    "host_permissions": ["http://127.0.0.1:8080/*", "https://chrome-extension-hkqp.onrender.com/*"],
-    "permissions":["activeTab", "declarativeContent", "storage", "scripting"],
-    "content_scripts": [
-   {
-     "matches": ["<all_urls>"],
-      "js": ["script.js"]
-   }],
-   
-    "cross_origin_embedder_policy": {
-      "value": "require-corp"
-    }
-
+  "manifest_version": 3,
+  "name": "Check Professor",
+  "version": "1.0",
+  "description": "Check information about professors by highlighting their names.",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
 }
