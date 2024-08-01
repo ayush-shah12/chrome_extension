@@ -19,7 +19,7 @@ async def main(url, prof_name):
 
         responses = []
         browser = await p.chromium.launch(executable_path=chromium_executable_path,headless=True, proxy=None,
-                                          args=['--binary={chrome_binary_location}','--no-sandbox', '--headless', '--disable-gpu', '--disable-web-security',
+                                          args=[f'--binary={chrome_binary_location}','--no-sandbox', '--headless', '--disable-gpu', '--disable-web-security',
                                                 '--disable-dev-sherlock', '--disable-infobars', '--disable-extensions',
                                                 '--disable-dev-tools'])
         context = await browser.new_context()
