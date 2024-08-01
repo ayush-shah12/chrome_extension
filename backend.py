@@ -35,10 +35,11 @@ async def main(url, prof_name):
 
         await page.route("**/graphql", handle_route)
 
+        print("Navigating to URL...")
         await page.goto('https://www.ratemyprofessors.com/search/professors/' + str(url) + '?q=' + prof_name)
-
+        print("Waiting for page to load...")
         await browser.close()
-
+        print("Page loaded.")
         return responses
 
 
