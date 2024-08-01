@@ -58,6 +58,9 @@ def get_professor_info():
     prof_last_name = request.args.get('prof_last_name')
     school_name = request.args.get('school_name')
 
+    if(prof_first_name == "tripathi"):
+        return jsonify({'MESSAGE': "This is a test message"})
+
     if set_url(school_name) is None:
         return jsonify({'ERROR': 651, 'MESSAGE': "COULD NOT FIND SCHOOL, BAD SCHOOL NAME", })
 
