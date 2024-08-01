@@ -1,10 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
-import asyncio
-from playwright.async_api import async_playwright
+from playwright.sync_api import sync_playwright, Playwright
 from nameToCode import nameToCode
 import os
-import requests
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -14,32 +12,31 @@ chrome_binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 chromium_executable_path = os.environ.get("CHROMEDRIVER_PATH")
 
 
-async def main(url, prof_name):
-    async with async_playwright() as p:
+def main(url, prof_name):
+    with sync_playwright() as p:
 
         responses = []
-        browser = await p.chromium.launch(executable_path=chromium_executable_path,headless=True, proxy=None,
+        browser = p.chromium.launch(executable_path=chromium_executable_path,headless=True, proxy=None,
                                           args=[f'--binary={chrome_binary_location}','--no-sandbox', '--headless', '--disable-gpu', '--disable-web-security',
                                                 '--disable-dev-sherlock', '--disable-infobars', '--disable-extensions',
                                                 '--disable-dev-tools'])
-        context = await browser.new_context()
-        page = await context.new_page()
+        context = browser.new_context()
+        page = context.new_page()
 
-        async def handle_route(route, request):
+        def handle_route(route, request):
             if "graphql" in request.url and request.method == "POST":
-                response = await route.fetch()
-                json_data = await response.json()
+                response = route.fetch()
+                json_data = response.json()
                 responses.append(json_data)
             else:
-                await route.continue_()
+                route.continue_()
 
-        await page.route("**/graphql", handle_route)
+        page.route("**/graphql", handle_route)
 
-        print("Navigating to URL...")
-        await page.goto('https://www.ratemyprofessors.com/search/professors/' + str(url) + '?q=' + prof_name)
-        print("Waiting for page to load...")
-        await browser.close()
-        print("Page loaded.")
+        page.goto('https://www.ratemyprofessors.com/search/professors/' + str(url) + '?q=' + prof_name)
+
+        browser.close()
+
         return responses
 
 
@@ -64,7 +61,7 @@ def get_professor_info():
     if set_url(school_name) is None:
         return jsonify({'ERROR': 651, 'MESSAGE': "COULD NOT FIND SCHOOL, BAD SCHOOL NAME", })
 
-    data = asyncio.run(main(set_url(school_name), prof_last_name))
+    data = main(set_url(school_name), prof_last_name)
 
     list_prof = data[0]['data']['search']['teachers']['edges']
 
@@ -85,5 +82,5 @@ def get_professor_info():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port)       
+    port = 8080
+    app.run(port=port)
