@@ -87,7 +87,8 @@ document.getElementById('submit-button').addEventListener('click', async () => {
   })
 
   errorText.style.display = 'none';
-  professorStats.textContent = `${firstName} ${lastName}'s Ratings`;
+  //professorStats.textContent = `${firstName} ${lastName}'s Ratings`;
+  professorStats.textContent = `${data['firstName']} ${data['lastName']}'s Ratings`;
   professorStats.classList.remove('hidden');
   resultSection.classList.remove('hidden');
   loadingScreen.classList.add('hidden');
