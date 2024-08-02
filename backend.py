@@ -4,6 +4,7 @@ from flask_cors import CORS, cross_origin
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+import os
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -188,4 +189,5 @@ def set_url(school_id):
 
 
 if __name__ == '__main__':
-    app.run()
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port) 
