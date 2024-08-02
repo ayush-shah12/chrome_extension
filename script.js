@@ -40,7 +40,7 @@ document.getElementById('submit-button').addEventListener('click', async () => {
     errorText.style.display = 'block';
     return;
   }
-  const fetchData = await fetch(`http://127.0.0.1:5000/get_professor_info?prof_first_name=${firstName}&prof_last_name=${lastName}&school_code=${storedCode}`).catch((err) => {
+  const fetchData = await fetch(`https://chrome-extension-b286ba0227dc.herokuapp.com/get_professor_info?prof_first_name=${firstName}&prof_last_name=${lastName}&school_code=${storedCode}`).catch((err) => {
     errorText.textContent = 'ERROR, PLEASE TRY AGAIN LATER.';
     errorText.style.display = 'block';
     loadingScreen.classList.add('hidden');
