@@ -4,9 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const storedData = JSON.parse(localStorage.getItem('selectedSchool'));
   const selectedSchool = storedData ? `@ ${storedData[0].toUpperCase()}` : "[SELECT A SCHOOL]";
   document.getElementById('school-link').innerText = selectedSchool;
-  chrome.storage.local.get('selectedText', (data) => {
-    document.getElementById('selectedText').value = data.selectedText || '';
-  });
+  // FOR SELECTED TEXT FEATURE
+  // chrome.storage.local.get('selectedText', (data) => {
+  //   document.getElementById('selectedText').value = data.selectedText || '';
+  // });
   autocomplete(document.getElementById("school-input"), schools);
 });
 
