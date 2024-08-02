@@ -55,7 +55,7 @@ document.getElementById('submit-button').addEventListener('click', async () => {
   }
   document.querySelector('#rating-value').textContent = data['avgRating'];
   document.querySelector('#difficulty-value').textContent = data['avgDifficulty'];
-  const wouldTakeAgainPercent = data['wouldTakeAgainPercent'];
+  const wouldTakeAgainPercent = data['wouldTakeAgainPercent'].toFixed(0);
   document.querySelector('#take-again-value').textContent = wouldTakeAgainPercent;
   const commentsContainer = document.getElementById('comments');
 
