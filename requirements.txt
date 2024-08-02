@@ -1,5 +1,0 @@
-Flask==3.0.3
-flask-cors==4.0.1
-requests==2.32.3
-playwright==1.45.0
-python-dotenv==1.0.1

@@ -1,110 +1,191 @@
+import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
-from playwright.sync_api import sync_playwright, Playwright
-from nameToCode import nameToCode
-import os
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
 CORS(app)
 
-chrome_binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-chromium_executable_path = os.environ.get("CHROMEDRIVER_PATH")
 
-browser = None
-context = None
+def get_data(school_code, prof_first, prof_last):
+    url = "https://www.ratemyprofessors.com/graphql"
 
-def setup_browser():
-    global browser, context
-    if browser is None:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                executable_path=chromium_executable_path,
-                headless=True,
-                args=[
-                    f'--binary={chrome_binary_location}',
-                    '--no-sandbox',
-                    '--disable-gpu',
-                    '--disable-web-security',
-                    '--disable-dev-shm-usage'
-                ]
-            )
-            context = browser.new_context()
+    headers = {
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Authorization': 'Basic dGVzdDp0ZXN0',
+        'Connection': 'keep-alive',
+        'Content-Length': '1467',
+        'Content-Type': 'application/json',
+        'Host': 'www.ratemyprofessors.com',
+        'Origin': 'https://www.ratemyprofessors.com',
+    }
 
-def close_browser():
-    global browser
-    if browser:
-        browser.close()
-        browser = None
+    payload = {
+        "query": """query TeacherSearchResultsPageQuery(
+          $query: TeacherSearchQuery!
+          $schoolID: ID
+          $includeSchoolFilter: Boolean!
+        ) {
+          search: newSearch {
+            ...TeacherSearchPagination_search_1ZLmLD
+          }
+          school: node(id: $schoolID) @include(if: $includeSchoolFilter) {
+            __typename
+            ... on School {
+              name
+            }
+            id
+          }
+        }
+    
+        fragment TeacherSearchPagination_search_1ZLmLD on newSearch {
+          teachers(query: $query, first: 8, after: "") {
+            didFallback
+            edges {
+              cursor
+              node {
+                ...TeacherCard_teacher
+                id
+                __typename
+              }
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            resultCount
+            filters {
+              field
+              options {
+                value
+                id
+              }
+            }
+          }
+        }
+    
+        fragment TeacherCard_teacher on Teacher {
+          id
+          legacyId
+          avgRating
+          numRatings
+          ...CardFeedback_teacher
+          ...CardSchool_teacher
+          ...CardName_teacher
+          ...TeacherBookmark_teacher
+        }
+    
+        fragment CardFeedback_teacher on Teacher {
+          wouldTakeAgainPercent
+          avgDifficulty
+        }
+    
+        fragment CardSchool_teacher on Teacher {
+          department
+          school {
+            name
+            id
+          }
+        }
+    
+        fragment CardName_teacher on Teacher {
+          firstName
+          lastName
+        }
+    
+        fragment TeacherBookmark_teacher on Teacher {
+          id
+          isSaved
+        }""",
+        "variables": {
+            "query": {
+                "text": prof_first + " " + prof_last,
+                "schoolID": school_code,
+                "fallback": True,
+                "departmentID": None
+            },
+            "schoolID": school_code,
+            "includeSchoolFilter": True
+        }
+    }
+
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+
+    data = []
+    for res in response.json()['data']['search']['teachers']['edges']:  # parsing data to be more readable
+        data.append(res['node'])
+    return data
 
 
-def main(url, prof_name):
-    global context
-    responses = []
-    page = context.new_page()
+def gen_comment(code, state):
+    if not state:  # To disable comments, switch state to false in gen_comment calls.
+        return "Comments were disabled."
 
-    def handle_route(route, request):
-        if "graphql" in request.url and request.method == "POST":
-            response = route.fetch()
-            json_data = response.json()
-            responses.append(json_data)
-        else:
-            route.continue_()
+    url = "https://www.ratemyprofessors.com/professor/" + str(code)
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, 'html.parser')
 
-    page.route("**/graphql", handle_route)
+    comments = []
+    comments_html = soup.find_all('div', {'class': 'Comments__StyledComments-dzzyvm-0 gRjWel'})
+    comments = [div.get_text(strip=True) for div in comments_html]
 
-    page.goto('https://www.ratemyprofessors.com/search/professors/' + str(url) + '?q=' + prof_name)
-
-    page.close()
-
-    return responses
-
-
-def set_url(school_name):
-    return nameToCode.get(school_name)
-
-
-def genComment(comments):
     if not comments:
-        return "No comments were found for this professor."
+        return ['No Comments Available']
     else:
-        return "Temporary comment, will add this AI comment later."
+        return comments[slice(6)]
 
 
 @app.route('/get_professor_info', methods=['GET'])
 @cross_origin()
 def get_professor_info():
-    prof_first_name = request.args.get('prof_first_name').lower()
-    prof_last_name = request.args.get('prof_last_name')
-    school_name = request.args.get('school_name')
+    # EXAMPLE SCHOOL_CODE: U2Nob29sLTEyMw== used for graphql
+    # EXAMPLE SCHOOL_ID: 123
 
-    if set_url(school_name) is None:
+    prof_first_name = request.args.get('prof_first_name').lower()
+    prof_last_name = request.args.get('prof_last_name').lower()
+    school_id = request.args.get('school_code')
+
+    school_code = set_url(school_id)
+
+    if school_code is None:
         return jsonify({'ERROR': 651, 'MESSAGE': "COULD NOT FIND SCHOOL, BAD SCHOOL NAME", })
 
-    data = main(set_url(school_name), prof_last_name)
+    data = get_data(school_code, prof_first_name, prof_last_name)
 
-    list_prof = data[0]['data']['search']['teachers']['edges']
+    if data is None:
+        return jsonify({'ERROR': 652, 'MESSAGE': "COULD NOT FIND TEACHER, BAD NAME", })
 
-    if not list_prof:
-        return jsonify({'ERROR': 652, 'MESSAGE': "COULD NOT FIND TEACHER, BAD LAST NAME", })
+    list_prof = data
 
     for prof in list_prof:
-        # Check if we get an exact match for the first name
-        if prof['node'].get('firstName').lower() == prof_first_name.lower():
-            prof['node']['comment'] = genComment([])
-            return jsonify(prof['node'])
+
+        # Check if we get an exact match for the first name OR last name
+        if prof.get('firstName').lower() == prof_first_name or prof.get('lastName').lower() == prof_last_name:
+            prof['comments'] = gen_comment(prof.get('legacyId'), True)
+            return jsonify(prof)
+
         # Check in the instance that the first name was abbreviated to only the first letter
-        if len(prof_first_name) == 1 and prof['node'].get('firstName').lower()[0] == prof_first_name.lower()[0]:
-            prof['node']['comment'] = genComment([])
-            return jsonify(prof['node'])
+        if len(prof_first_name) == 1 and prof.get('firstName').lower()[0] == prof_first_name[0] and prof.get(
+                'lastName').lower() == prof_last_name:
+            prof['comments'] = gen_comment(prof.get('legacyId'), True)
+            return jsonify(prof)
+
     # Otherwise return error.
-    return jsonify({'ERROR': 653, 'MESSAGE': "COULD NOT FIND TEACHER, BAD FIRST NAME", })
+    return jsonify({'ERROR': 653, 'MESSAGE': "COULD NOT FIND TEACHER, BAD NAME", })
+
+
+def set_url(school_id):
+    data = pd.read_csv("schools.csv")
+    for index, row in data.iterrows():
+        if row['School ID'] == int(school_id):
+            return row['School Code']
+    return None
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
-    try:
-        setup_browser()
-        app.run(host='0.0.0.0', port=port) 
-    finally:
-        close_browser()
+    app.run()
