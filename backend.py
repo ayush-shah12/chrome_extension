@@ -166,18 +166,18 @@ def get_professor_info():
     for prof in list_prof:
 
         # Check if we get an exact match for the first name and last name
-        if prof.get('firstName').lower() == prof_first_name and prof.get('lastName').lower() == prof_last_name:
+        if prof.get('firstName').lower() == prof_first_name and prof.get('lastName').lower() == prof_last_name and prof.get('school').get('id') == str(school_code):
             prof['comments'] = gen_comment(prof.get('legacyId'), True)
             return jsonify(prof)
         
         # matching first name OR last name ONLY if above clause didn't trigger
-        if prof.get('firstName').lower() == prof_first_name or prof.get('lastName').lower() == prof_last_name:
+        if prof.get('firstName').lower() == prof_first_name or prof.get('lastName').lower() == prof_last_name and prof.get('school').get('id') == str(school_code):
             prof['comments'] = gen_comment(prof.get('legacyId'), True)
             return jsonify(prof)
 
         # Check in the instance that the first name was abbreviated to only the first letter
         if len(prof_first_name) == 1 and prof.get('firstName').lower()[0] == prof_first_name[0] and prof.get(
-                'lastName').lower() == prof_last_name:
+                'lastName').lower() == prof_last_name and prof.get('school').get('id') == str(school_code):
             prof['comments'] = gen_comment(prof.get('legacyId'), True)
             return jsonify(prof)
 
@@ -190,6 +190,13 @@ def set_url(school_id):
     for index, row in data.iterrows():
         if row['School ID'] == int(school_id):
             return row['School Code']
+    return None
+
+def codeToName(school_id):
+    data = pd.read_csv("schools.csv")
+    for index, row in data.iterrows():
+        if row['School Code'] == school_id:
+            return row['School Name']
     return None
 
 
