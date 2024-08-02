@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Check Professor",
+  "name": "Rate My Professor Extension(Any University, Any Website)",
   "version": "1.0",
-  "description": "Check information about professors by highlighting their names.",
+  "description": "Check information about professors by simply inputting their name eliminating the need to switch tabs.",
   "permissions": [
     "contextMenus",
     "activeTab",
@@ -13,5 +13,10 @@
   },
   "action": {
     "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "images/default_icon16.png",
+    "48": "images/default_icon48.png",
+    "128": "images/default_icon.png"
   }
 }
