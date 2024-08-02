@@ -165,7 +165,12 @@ def get_professor_info():
 
     for prof in list_prof:
 
-        # Check if we get an exact match for the first name OR last name
+        # Check if we get an exact match for the first name and last name
+        if prof.get('firstName').lower() == prof_first_name and prof.get('lastName').lower() == prof_last_name:
+            prof['comments'] = gen_comment(prof.get('legacyId'), True)
+            return jsonify(prof)
+        
+        # matching first name OR last name ONLY if above clause didn't trigger
         if prof.get('firstName').lower() == prof_first_name or prof.get('lastName').lower() == prof_last_name:
             prof['comments'] = gen_comment(prof.get('legacyId'), True)
             return jsonify(prof)
