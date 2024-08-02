@@ -30,8 +30,8 @@ document.getElementById('submit-button').addEventListener('click', async () => {
   loadingScreen.classList.remove('hidden');
   
   const storedCode = JSON.parse(localStorage.getItem('selectedSchool'))[1];
-  if (!firstName || !lastName) {
-    errorText.textContent = 'PLEASE ENTER A VALID FIRST AND LAST NAME.';
+  if (!firstName && !lastName) {
+    errorText.textContent = 'PLEASE ENTER EITHER A VALID FIRST OR LAST NAME.';
     errorText.style.display = 'block';
     loadingScreen.classList.add('hidden');
     return;
@@ -56,8 +56,13 @@ document.getElementById('submit-button').addEventListener('click', async () => {
   document.querySelector('#rating-value').textContent = data['avgRating'];
   document.querySelector('#difficulty-value').textContent = data['avgDifficulty'];
   const wouldTakeAgainPercent = data['wouldTakeAgainPercent'].toFixed(0);
-  document.querySelector('#take-again-value').textContent = wouldTakeAgainPercent;
-  const commentsContainer = document.getElementById('comments');
+  if(wouldTakeAgainPercent == -1){
+    document.querySelector('#take-again-value').textContent = "N/A";
+  }
+  else{
+    document.querySelector('#take-again-value').textContent = wouldTakeAgainPercent;
+  }
+    const commentsContainer = document.getElementById('comments');
 
   commentsContainer.innerHTML = '';
   const firstComments = data['comments'].slice(0, 5);
