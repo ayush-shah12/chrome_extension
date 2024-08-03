@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   //for saving last searched professor information
   if (localStorage.getItem('savedProfInfo') != null) {
 
-    //const firstName = document.getElementById('first-name').value.trim();
-    //const lastName = document.getElementById('last-name').value.trim();
     const errorText = document.getElementById('error-text');
     const professorStats = document.getElementById('professor-stats');
     const resultSection = document.getElementById('result-section');
@@ -39,8 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
       commentsContainer.appendChild(commentDiv);
     });
 
-    
-
     const circles = document.querySelectorAll('.circle');
     circles.forEach(elem => {
       const dots = 80
@@ -56,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let i = 0; i < percent; i++) {
         pointsMarked[i].classList.add('marked')
       }
-
     })
   
 
@@ -136,7 +131,6 @@ document.getElementById('submit-button').addEventListener('click', async () => {
     commentsContainer.appendChild(commentDiv);
   });
 
-  //ADDED JUST NOW
   localStorage.setItem('savedProfInfo', JSON.stringify({ 'firstName': data['firstName'], 'lastName': data['lastName'], 'avgRating': data['avgRating'], 'avgDifficulty': data['avgDifficulty'], 'wouldTakeAgainPercent': data['wouldTakeAgainPercent'] == -1 ? "N/A" : data['wouldTakeAgainPercent'].toFixed(0), 'comments': firstComments }));
 
   const circles = document.querySelectorAll('.circle');
@@ -157,7 +151,6 @@ document.getElementById('submit-button').addEventListener('click', async () => {
   })
 
   errorText.style.display = 'none';
-  //professorStats.textContent = `${firstName} ${lastName}'s Ratings`;
   professorStats.textContent = `${data['firstName']} ${data['lastName']}'s Ratings`;
   professorStats.classList.remove('hidden');
   resultSection.classList.remove('hidden');
