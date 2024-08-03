@@ -5,10 +5,11 @@ Tired of juggling multiple RateMyProfessors tabs while planning your courses? Ou
 
 With just a few clicks, you can:
      
-     • Search for Professor Ratings: Enter the professor's name and select your University/College to instantly retrieve
-       detailed, real-time statistics from RateMyProfessors.
+     • Search for Professor Ratings: Enter the professor's name and select your University/College to
+       instantly retrieve detailed, real-time statistics from RateMyProfessors.
 
-     • View Ratings and Comments: Get up-to-date ratings, comments, and more without ever leaving your current page.
+     • View Ratings and Comments: Get up-to-date ratings, comments, and more without ever leaving
+       your current page.
 
 We developed this extension to eliminate the hassle of navigating through RateMyProfessors' various search queries and to streamline your course selection process.
 
