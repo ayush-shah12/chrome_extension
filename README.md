@@ -33,10 +33,10 @@ Experience a more efficient and stress-free way to select your courses. Install 
 
 ## Intallation
 
-To run this project:
+To intall this project:
 
 ```bash
-  Install @ https://chromewebstore.google.com/
+  https://chromewebstore.google.com/
 ```
 
 
