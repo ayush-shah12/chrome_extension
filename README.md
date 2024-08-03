@@ -15,7 +15,7 @@ We developed this extension to eliminate the hassle of navigating through RateMy
 
 Why Choose Us?
      
-     • Works for ANY University/College: No matter where you are studying, our extension has you covered.
+     • Works for ANY University/College: No matter where you are studying, our extension works.
 
      • Real-Time Queries: Receive the most current information available.
 
