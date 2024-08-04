@@ -1,3 +1,4 @@
+
 import { schools } from './schools.js';
 
 document.addEventListener('DOMContentLoaded', () => {
