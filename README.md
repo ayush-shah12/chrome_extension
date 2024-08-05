@@ -36,7 +36,7 @@ Experience a more efficient and stress-free way to select your courses. Install 
 To intall this project:
 
 ```bash
-  https://chromewebstore.google.com/
+  https://chromewebstore.google.com/detail/rate-my-professor-extensi/alhijcehgndilnnedijemckkcpnnjolb
 ```
 
 
