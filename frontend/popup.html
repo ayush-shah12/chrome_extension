@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="popup.css">
+    <title>Chrome Extension Popup</title>
+</head>
+<body>
+    <div class="container" id="main-section">
+        <h1>Find Professor Stats</h1>
+        <p>Enter the professor's first and/or last name to retrieve detailed statistics. The system will find the closest match to the entered data, if it exists.
+        </p>
+        <div class="input-container">
+          <div class="input-group">
+            <label for="first-name">First Name</label>
+            <input type="text" id="first-name">
+          </div>
+          <button id="swap-button">
+            <img src="images/swap.png" alt="Swap" class="swap-img">
+          </button>
+          <div class="input-group">
+            <label for="last-name">Last Name</label>
+            <input type="text" id="last-name">
+          </div>
+        </div>
+        <a href="#school-section" id="school-link">[SELECT A SCHOOL]</a>
+        <div class="space"></div>
+        <button id="submit-button">Submit</button>
+        <div id="loading" class="hidden">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        <h4 id="professor-stats"></h4>
+        <p id="error-text" class="error-text"></p>
+        <div id="result-section" class="hidden">
+          <div class="box-container">
+            <div class="box">
+                <div class="avg-rating">
+                  <h2 id="avg-rating-num"><span id="rating-value">4.2</span><sup>/5</sup></h2>
+                    <p>Rating</p>
+                </div>
+                <div class="avg-difficulty">
+                    <h2 id="avg-difficulty-num"><span id="difficulty-value">4.2</span><sup>/5</sup></h2>
+                    <p>Difficulty</p>
+                </div>
+            </div>
+            <div class="box">
+                <div class="boxbar">
+                    <div class="circle" style="--bgColor: #ff0070"></div>
+                    <div class="text">
+                    <h2 id="circle-num"><span id="take-again-value">90</span><sup>%</sup></h2>
+                    <small>Would Take Again</small>
+                </div>
+                </div>
+            </div>
+          </div>
+          <div id="comments-section">
+            <h3>Student Comments</h3>
+            <div id="comments"></div>
+          </div>
+        </div>
+      </div>
+      <div class="container hidden" id="school-section">
+        <h2>Select School</h2>
+        <div>
+          <label>Select School:</label>
+          <input type="text" id="school-input" placeholder="Start typing school name..." autocomplete="off">
+          <div id="autocomplete-list" class="autocomplete-suggestions"></div>
+        </div>
+        <button id="back-button">Back</button>
+      </div>
+    </div>
+    <span id="loading-screen-on-off" class="hidden">
+      <div id="loading-screen">
+        <div class="loading-circles">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    </span>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
