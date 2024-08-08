@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Rate My Professor Extension (Any University, Any Website)",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Check information about professors by simply inputting their name eliminating the need to switch tabs.",
   
   "action": {
