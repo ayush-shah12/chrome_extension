@@ -1,4 +1,4 @@
-export const schools = {
+const schools = {
 	"Abilene Christian University" : 1,
 	"Abraham Baldwin Agricultural College" : 2,
 	"Academy of Art University" : 3,
@@ -4034,3 +4034,5 @@ export const schools = {
 	"Stenberg College" : 6047,
     "Le Cordon Bleu College of Culinary Arts" : 6049,
 }
+
+export { schools }

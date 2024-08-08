@@ -1,6 +1,6 @@
 import { displayComments, displayTags, displayCircle } from './displayData.js'
 
-export function savedProfInfo() {
+function savedProfInfo() {
   const storedData = JSON.parse(localStorage.getItem('selectedSchool'));
   const selectedSchool = storedData ? `@ ${storedData[0].toUpperCase()}` : "[SELECT A SCHOOL]";
   document.getElementById('school-link').innerText = selectedSchool;
@@ -36,3 +36,5 @@ export function savedProfInfo() {
     loadingScreen.classList.add('hidden');
   }
 }
+
+export { savedProfInfo }

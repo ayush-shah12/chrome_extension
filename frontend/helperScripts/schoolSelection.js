@@ -1,6 +1,6 @@
 import { schools } from './schools.js';
 
-export function autoComplete(input, dictionary) {
+function autoComplete(input, dictionary) {
     let currentFocus;
   
     input.addEventListener("focus", function() {
@@ -79,3 +79,5 @@ export function autoComplete(input, dictionary) {
       closeAllLists(e.target);
     });
 }
+
+export { autoComplete }

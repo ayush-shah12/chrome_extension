@@ -1,10 +1,23 @@
-export function displayComments(comments) {
+function displayComments(comments) {
+    if (comments.length === 0) {
+      comments.push({
+        'course': "",
+        'date': "",
+        'comment': "There are no student submitted comments about this professor.",
+        'wta': "",
+      })
+    }
+
     const commentsContainer = document.getElementById('comments');
-    commentsContainer.innerHTML = ''; // Clear previous comments
+    commentsContainer.innerHTML = '';
   
     comments.forEach(comment => {
         const commentElement = document.createElement('div');
         commentElement.className = 'comment';
+
+        if (comment.wta !== "") {
+          comment.wta = `Would Take Again: ${comment.wta}`
+        }
   
         commentElement.innerHTML = `
             <div class="comment-header">
@@ -12,16 +25,16 @@ export function displayComments(comments) {
                 <span class="date">${comment.date}</span>
             </div>
             <div class="comment-body">${comment.comment}</div>
-            <div class="comment-footer">Would Take Again: ${comment.wta}</div>
+            <div class="comment-footer">${comment.wta}</div>
         `;
   
         commentsContainer.appendChild(commentElement);
     });
   }
   
-export function displayTags(tags) {
+function displayTags(tags) {
     const tagsContainer = document.getElementById('tags');
-    tagsContainer.innerHTML = ''; // Clear existing tags if any
+    tagsContainer.innerHTML = '';
   
     tags.forEach(tagText => {
         const tagDiv = document.createElement('div');
@@ -31,7 +44,7 @@ export function displayTags(tags) {
     });
 }
 
-export function displayCircle(wouldTakeAgainPercent) {
+function displayCircle(wouldTakeAgainPercent) {
     const circles = document.querySelectorAll('.circle');
     circles.forEach(elem => {
       const dots = 80
@@ -49,3 +62,5 @@ export function displayCircle(wouldTakeAgainPercent) {
       }
     })
 }
+
+export { displayComments, displayTags, displayCircle}
