@@ -1,7 +1,7 @@
-import { schools } from './schools.js';
-import { autoComplete } from './schoolSelection.js';
-import { savedProfInfo } from './savedProf.js';
-import { displayComments, displayTags } from './displayData.js';
+import { schools } from './helperScripts/schools.js';
+import { autoComplete } from './helperScripts/schoolSelection.js';
+import { savedProfInfo } from './helperScripts/savedProf.js';
+import { displayComments, displayTags, displayCircle } from './helperScripts/displayData.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   savedProfInfo();
@@ -25,11 +25,13 @@ document.getElementById('submit-button').addEventListener('click', async () => {
   const professorStatsNum = document.getElementById('professor-stats-num');
   const resultSection = document.getElementById('result-section');
   const loadingScreen = document.getElementById('loading-screen-on-off');
+
   resultSection.classList.add('hidden');
   professorStats.classList.add('hidden');
   professorStatsDep.classList.add('hidden');
   professorStatsNum.classList.add('hidden');
   loadingScreen.classList.remove('hidden');
+
   const storedCode = JSON.parse(localStorage.getItem('selectedSchool')) == null ? null : JSON.parse(localStorage.getItem('selectedSchool'))[1];
 
   if (!firstName || !lastName) {
@@ -66,32 +68,18 @@ document.getElementById('submit-button').addEventListener('click', async () => {
     document.querySelector('#take-again-value').textContent = wouldTakeAgainPercent;
   }
 
-  displayComments(data['userCards'])
-  displayTags(data['tags'])
-
   localStorage.setItem('savedProfInfo', JSON.stringify({ 'firstName': data['firstName'], 'lastName': data['lastName'], 'avgRating': data['avgRating'], 'avgDifficulty': data['avgDifficulty'], 'wouldTakeAgainPercent': data['wouldTakeAgainPercent'] == -1 ? "N/A" : data['wouldTakeAgainPercent'].toFixed(0), 'userCards': data['userCards'], 'department': data['department'], 'numRatings': data['numRatings'], 'tags': data['tags'] }));
 
-  const circles = document.querySelectorAll('.circle');
-  circles.forEach(elem => {
-    const dots = 80
-    let marked = wouldTakeAgainPercent
-    let percent = Math.floor(dots * marked / 100);
-    let rotate = 360 / dots;
-    let points = "";
-    for (let i = 0; i < dots; i++) {
-      points += `<div class="points" style="--i: ${i}; --rot: ${rotate}deg"></div>`;
-    }
-    elem.innerHTML = points;
-    const pointsMarked = elem.querySelectorAll('.points');
-    for (let i = 0; i < percent; i++) {
-      pointsMarked[i].classList.add('marked')
-    }
-  })
+  displayComments(data['userCards']);
+  displayTags(data['tags']);
+  displayCircle(wouldTakeAgainPercent);
 
   errorText.style.display = 'none';
+
   professorStats.textContent = `${data['firstName']} ${data['lastName']}'s Ratings`;
   professorStatsDep.textContent = `Department of ${data['department']}`;
   professorStatsNum.textContent = `${data['numRatings']} Ratings`;
+
   professorStats.classList.remove('hidden');
   professorStatsDep.classList.remove('hidden');
   professorStatsNum.classList.remove('hidden');
