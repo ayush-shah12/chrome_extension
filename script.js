@@ -1,71 +1,83 @@
-
 import { schools } from './schools.js';
 
+let messageReceived = false;
+
+//initial check for school name, possibly not needed
+chrome.runtime.sendMessage({ action: "getSchool", message: localStorage.getItem('selectedSchool') });
+
 document.addEventListener('DOMContentLoaded', () => {
-  const storedData = JSON.parse(localStorage.getItem('selectedSchool'));
-  const selectedSchool = storedData ? `@ ${storedData[0].toUpperCase()}` : "[SELECT A SCHOOL]";
-  document.getElementById('school-link').innerText = selectedSchool;
+
+  //sends message, and recieves the highlighted prof info as response.message
+  //this code block might need to be moved somewhere else, since it will always run on popup load
+  chrome.runtime.sendMessage({ action: "getProfInfo" }, (response) => {
+    if (chrome.runtime.lastError) {
+      console.error('Error sending message:', chrome.runtime.lastError);
+    } else {
+      console.log('Received response:', response.message);
+      messageReceived = true;
+      submitFunction(response.message);
+    }
+  });
+
+
+    const storedData = JSON.parse(localStorage.getItem('selectedSchool'));
+    const selectedSchool = storedData ? `@ ${storedData[0].toUpperCase()}` : "[SELECT A SCHOOL]";
+    document.getElementById('school-link').innerText = selectedSchool;
+
+    //for saving last searched professor information
+    if (localStorage.getItem('savedProfInfo') != null) {
+
+      const errorText = document.getElementById('error-text');
+      const professorStats = document.getElementById('professor-stats');
+      const resultSection = document.getElementById('result-section');
+      const loadingScreen = document.getElementById('loading-screen-on-off');
+
+      document.getElementById('first-name').value = JSON.parse(localStorage.getItem('savedProfInfo'))['firstName'];
+      document.getElementById('last-name').value = JSON.parse(localStorage.getItem('savedProfInfo'))['lastName'];
+      document.querySelector('#rating-value').textContent = JSON.parse(localStorage.getItem('savedProfInfo'))['avgRating'];
+      document.querySelector('#difficulty-value').textContent = JSON.parse(localStorage.getItem('savedProfInfo'))['avgDifficulty'];
+
+      const wouldTakeAgainPercent = JSON.parse(localStorage.getItem('savedProfInfo'))['wouldTakeAgainPercent'];
+      document.querySelector('#take-again-value').textContent = wouldTakeAgainPercent;
+
+      const commentsContainer = document.getElementById('comments');
+      commentsContainer.innerHTML = '';
+      const firstComments = JSON.parse(localStorage.getItem('savedProfInfo'))['comments'];
+
+      firstComments.forEach(commentText => {
+        const commentDiv = document.createElement('div');
+        commentDiv.className = 'comment';
+        commentDiv.textContent = commentText;
+        commentsContainer.appendChild(commentDiv);
+      });
+
+      const circles = document.querySelectorAll('.circle');
+      circles.forEach(elem => {
+        const dots = 80
+        var marked = wouldTakeAgainPercent == "N/A" ? -1 : wouldTakeAgainPercent;
+        var percent = Math.floor(dots * marked / 100);
+        var rotate = 360 / dots;
+        var points = "";
+        for (let i = 0; i < dots; i++) {
+          points += `<div class="points" style="--i: ${i}; --rot: ${rotate}deg"></div>`;
+        }
+        elem.innerHTML = points;
+        const pointsMarked = elem.querySelectorAll('.points');
+        for (let i = 0; i < percent; i++) {
+          pointsMarked[i].classList.add('marked')
+        }
+      })
+
+
+      errorText.style.display = 'none';
+      professorStats.textContent = `${JSON.parse(localStorage.getItem('savedProfInfo'))['firstName']} ${JSON.parse(localStorage.getItem('savedProfInfo'))['lastName']}'s Ratings`;
+      professorStats.classList.remove('hidden');
+      resultSection.classList.remove('hidden');
+      loadingScreen.classList.add('hidden');
+    }
+
+    autocomplete(document.getElementById("school-input"), schools);
   
-  // FOR SELECTED TEXT FEATURE
-  // chrome.storage.local.get('selectedText', (data) => {
-  //   document.getElementById('selectedText').value = data.selectedText || '';
-  // });
-
-  //for saving last searched professor information
-  if (localStorage.getItem('savedProfInfo') != null) {
-
-    const errorText = document.getElementById('error-text');
-    const professorStats = document.getElementById('professor-stats');
-    const resultSection = document.getElementById('result-section');
-    const loadingScreen = document.getElementById('loading-screen-on-off');
-
-    document.getElementById('first-name').value = JSON.parse(localStorage.getItem('savedProfInfo'))['firstName'];
-    document.getElementById('last-name').value = JSON.parse(localStorage.getItem('savedProfInfo'))['lastName'];
-    document.querySelector('#rating-value').textContent = JSON.parse(localStorage.getItem('savedProfInfo'))['avgRating'];
-    document.querySelector('#difficulty-value').textContent = JSON.parse(localStorage.getItem('savedProfInfo'))['avgDifficulty'];
-
-    const wouldTakeAgainPercent = JSON.parse(localStorage.getItem('savedProfInfo'))['wouldTakeAgainPercent'];
-    document.querySelector('#take-again-value').textContent = wouldTakeAgainPercent;
-
-    const commentsContainer = document.getElementById('comments');
-    commentsContainer.innerHTML = '';
-    const firstComments = JSON.parse(localStorage.getItem('savedProfInfo'))['comments'];
-
-    firstComments.forEach(commentText => {
-      const commentDiv = document.createElement('div');
-      commentDiv.className = 'comment';
-      commentDiv.textContent = commentText;
-      commentsContainer.appendChild(commentDiv);
-    });
-
-    const circles = document.querySelectorAll('.circle');
-    circles.forEach(elem => {
-      const dots = 80
-      var marked = wouldTakeAgainPercent == "N/A" ? -1 : wouldTakeAgainPercent;
-      var percent = Math.floor(dots * marked / 100);
-      var rotate = 360 / dots;
-      var points = "";
-      for (let i = 0; i < dots; i++) {
-        points += `<div class="points" style="--i: ${i}; --rot: ${rotate}deg"></div>`;
-      }
-      elem.innerHTML = points;
-      const pointsMarked = elem.querySelectorAll('.points');
-      for (let i = 0; i < percent; i++) {
-        pointsMarked[i].classList.add('marked')
-      }
-    })
-  
-
-    errorText.style.display = 'none';
-    professorStats.textContent = `${JSON.parse(localStorage.getItem('savedProfInfo'))['firstName']} ${JSON.parse(localStorage.getItem('savedProfInfo'))['lastName']}'s Ratings`;
-    professorStats.classList.remove('hidden');
-    resultSection.classList.remove('hidden');
-    loadingScreen.classList.add('hidden');
-
-
-  }
-
-  autocomplete(document.getElementById("school-input"), schools);
 });
 
 document.getElementById('swap-button').addEventListener('click', () => {
@@ -76,9 +88,35 @@ document.getElementById('swap-button').addEventListener('click', () => {
   lastNameInput.value = temp;
 });
 
-document.getElementById('submit-button').addEventListener('click', async () => {
-  const firstName = document.getElementById('first-name').value.trim();
-  const lastName = document.getElementById('last-name').value.trim();
+document.getElementById('school-link').addEventListener('click', () => {
+  document.getElementById('main-section').classList.add('hidden');
+  document.getElementById('school-section').classList.remove('hidden');
+});
+
+document.getElementById('back-button').addEventListener('click', () => {
+  document.getElementById('school-section').classList.add('hidden');
+  document.getElementById('main-section').classList.remove('hidden');
+});
+
+async function submitFunction(name = null) {
+
+  let firstName = "";
+  let lastName = "";
+  if (name == null) {
+    firstName = document.getElementById('first-name').value.trim();
+    lastName = document.getElementById('last-name').value.trim();
+  }
+
+  else {
+    if (name.includes('')) {
+      firstName = name.split(' ')[0];
+      lastName = name.split(' ')[1];
+    }
+    else {
+      firstName = name;
+      lastName = "";
+    }
+  }
   const errorText = document.getElementById('error-text');
   const professorStats = document.getElementById('professor-stats');
   const resultSection = document.getElementById('result-section');
@@ -157,20 +195,13 @@ document.getElementById('submit-button').addEventListener('click', async () => {
   resultSection.classList.remove('hidden');
   loadingScreen.classList.add('hidden');
 
-});
+};
 
-document.getElementById('school-link').addEventListener('click', () => {
-  document.getElementById('main-section').classList.add('hidden');
-  document.getElementById('school-section').classList.remove('hidden');
-});
-
-document.getElementById('back-button').addEventListener('click', () => {
-  document.getElementById('school-section').classList.add('hidden');
-  document.getElementById('main-section').classList.remove('hidden');
+document.getElementById('submit-button').addEventListener('click', async () => {
+  submitFunction();
 });
 
 // SELECT SCHOOL SECTION
-
 function autocomplete(input, dictionary) {
   let currentFocus;
 
@@ -195,6 +226,7 @@ function autocomplete(input, dictionary) {
           input.value = this.getElementsByTagName("input")[0].value;
           document.getElementById('school-link').innerText = `@ ${input.value.toUpperCase()}`;
           localStorage.setItem('selectedSchool', JSON.stringify([input.value, schools[input.value]]));
+          chrome.runtime.sendMessage({ action: "getSchool", message: localStorage.getItem('selectedSchool') });   //sending updated school to background.js
           closeAllLists();
         });
         suggestions.appendChild(suggestion);

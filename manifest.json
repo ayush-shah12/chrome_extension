@@ -4,8 +4,15 @@
   "version": "1.0",
   "description": "Check information about professors by simply inputting their name eliminating the need to switch tabs.",
   
+  "permissions": [
+    "contextMenus"
+  ],
+
   "action": {
     "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "icons": {
     "16": "images/default_icon16.png",
