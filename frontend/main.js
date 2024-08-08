@@ -2,98 +2,130 @@ import { schools } from './helperScripts/schools.js';
 import { autoComplete } from './helperScripts/schoolSelection.js';
 import { savedProfInfo } from './helperScripts/savedProf.js';
 import { displayComments, displayTags, displayCircle } from './helperScripts/displayData.js';
+import { returnBtn, schoolBtn, swapBtn } from './helperScripts/buttons.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   savedProfInfo();
   autoComplete(document.getElementById("school-input"), schools);
 });
 
-document.getElementById('swap-button').addEventListener('click', () => {
-  const firstNameInput = document.getElementById('first-name');
-  const lastNameInput = document.getElementById('last-name');
-  const temp = firstNameInput.value;
-  firstNameInput.value = lastNameInput.value;
-  lastNameInput.value = temp;
-});
+async function handleSubmit() {
+  const { firstName, lastName, errorText, storedCode } = initializeForm();
 
-document.getElementById('submit-button').addEventListener('click', async () => {
+  if (!isValidInput(firstName, lastName, storedCode, errorText)) return;
+
+  try {
+    const data = await fetchProfessorData(firstName, lastName, storedCode);
+    if (data && !data.ERROR) {
+      updateUIWithProfessorData(data);
+    } else {
+      handleFetchError(data, errorText);
+    }
+  } catch (err) {
+    handleFetchError(null, errorText, err);
+  }
+}
+
+function initializeForm() {
   const firstName = document.getElementById('first-name').value.trim();
   const lastName = document.getElementById('last-name').value.trim();
   const errorText = document.getElementById('error-text');
+
+  hideSections(['result-section', 'professor-stats', 'professor-stats-dep', 'professor-stats-num', 'loading-screen-on-off']);
+  showSections(['loading-screen-on-off']);
+
+  errorText.style.display = 'none';
+  errorText.textContent = '';
+
+  const storedCode = getStoredSchoolCode();
+
+  return { firstName, lastName, errorText, storedCode };
+}
+
+function isValidInput(firstName, lastName, storedCode, errorText) {
+  if (!firstName || !lastName) {
+    displayError('PLEASE ENTER A VALID FIRST AND LAST NAME.', errorText);
+    return false;
+  } else if (!storedCode) {
+    displayError('PLEASE SELECT A SCHOOL BEFORE BROWSING PROFESSORS.', errorText);
+    return false;
+  }
+  return true;
+}
+
+async function fetchProfessorData(firstName, lastName, storedCode) {
+  const response = await fetch(`http://127.0.0.1:8080/get_professor_info?prof_first_name=${firstName}&prof_last_name=${lastName}&school_code=${storedCode}`);
+  return response.json();
+}
+
+function handleFetchError(data, errorText, err = null) {
+  errorText.textContent = data ? data.MESSAGE : 'ERROR, PLEASE TRY AGAIN LATER.';
+  errorText.style.display = 'block';
+  hideSections(['loading-screen-on-off']);
+  if (err) console.log(err);
+}
+
+function updateUIWithProfessorData(data) {
+  const wouldTakeAgainPercent = data.wouldTakeAgainPercent.toFixed(0);
+  
+  document.querySelector('#rating-value').textContent = data.avgRating;
+  document.querySelector('#difficulty-value').textContent = data.avgDifficulty;
+  document.querySelector('#take-again-value').textContent = wouldTakeAgainPercent === "-1" ? "N/A" : wouldTakeAgainPercent;
+
+  localStorage.setItem('savedProfInfo', JSON.stringify({
+    firstName: data.firstName,
+    lastName: data.lastName,
+    avgRating: data.avgRating,
+    avgDifficulty: data.avgDifficulty,
+    wouldTakeAgainPercent: wouldTakeAgainPercent === "-1" ? "N/A" : wouldTakeAgainPercent,
+    userCards: data.userCards,
+    department: data.department,
+    numRatings: data.numRatings,
+    tags: data.tags
+  }));
+
+  displayComments(data.userCards);
+  displayTags(data.tags);
+  displayCircle(wouldTakeAgainPercent);
+
+  updateProfessorStatsUI(data);
+  showSections(['professor-stats', 'professor-stats-dep', 'professor-stats-num', 'result-section']);
+  hideSections(['loading-screen-on-off']);
+}
+
+function updateProfessorStatsUI(data) {
   const professorStats = document.getElementById('professor-stats');
   const professorStatsDep = document.getElementById('professor-stats-dep');
   const professorStatsNum = document.getElementById('professor-stats-num');
-  const resultSection = document.getElementById('result-section');
-  const loadingScreen = document.getElementById('loading-screen-on-off');
 
-  resultSection.classList.add('hidden');
-  professorStats.classList.add('hidden');
-  professorStatsDep.classList.add('hidden');
-  professorStatsNum.classList.add('hidden');
-  loadingScreen.classList.remove('hidden');
+  professorStats.textContent = `${data.firstName} ${data.lastName}'s Ratings`;
+  professorStatsDep.textContent = `Department of ${data.department}`;
+  professorStatsNum.textContent = `${data.numRatings} Ratings`;
+}
 
-  const storedCode = JSON.parse(localStorage.getItem('selectedSchool')) == null ? null : JSON.parse(localStorage.getItem('selectedSchool'))[1];
+function displayError(message, errorText) {
+  errorText.textContent = message;
+  errorText.style.display = 'block';
+  hideSections(['loading-screen-on-off']);
+}
 
-  if (!firstName || !lastName) {
-    errorText.textContent = 'PLEASE ENTER A VALID FIRST AND LAST NAME.';
-    errorText.style.display = 'block';
-    loadingScreen.classList.add('hidden');
-    return;
-  } else if (storedCode == null) {
-    errorText.textContent = 'PLEASE SELECT A SCHOOL BEFORE BROWSING PROFESSORS.';
-    errorText.style.display = 'block';
-    loadingScreen.classList.add('hidden');
-    return;
-  }
-  const fetchData = await fetch(`http://127.0.0.1:8080/get_professor_info?prof_first_name=${firstName}&prof_last_name=${lastName}&school_code=${storedCode}`).catch((err) => {
-    errorText.textContent = 'ERROR, PLEASE TRY AGAIN LATER.';
-    errorText.style.display = 'block';
-    loadingScreen.classList.add('hidden');
-    return;
-  })
-  const data = await fetchData.json();
-  if ("ERROR" in data) {
-    errorText.textContent = data['MESSAGE'];
-    errorText.style.display = 'block';
-    loadingScreen.classList.add('hidden');
-    return;
-  }
-  document.querySelector('#rating-value').textContent = data['avgRating'];
-  document.querySelector('#difficulty-value').textContent = data['avgDifficulty'];
-  const wouldTakeAgainPercent = data['wouldTakeAgainPercent'].toFixed(0);
-  if (wouldTakeAgainPercent == -1) {
-    document.querySelector('#take-again-value').textContent = "N/A";
-  }
-  else {
-    document.querySelector('#take-again-value').textContent = wouldTakeAgainPercent;
-  }
+function hideSections(sectionIds) {
+  sectionIds.forEach(id => document.getElementById(id).classList.add('hidden'));
+}
 
-  localStorage.setItem('savedProfInfo', JSON.stringify({ 'firstName': data['firstName'], 'lastName': data['lastName'], 'avgRating': data['avgRating'], 'avgDifficulty': data['avgDifficulty'], 'wouldTakeAgainPercent': data['wouldTakeAgainPercent'] == -1 ? "N/A" : data['wouldTakeAgainPercent'].toFixed(0), 'userCards': data['userCards'], 'department': data['department'], 'numRatings': data['numRatings'], 'tags': data['tags'] }));
+function showSections(sectionIds) {
+  sectionIds.forEach(id => document.getElementById(id).classList.remove('hidden'));
+}
 
-  displayComments(data['userCards']);
-  displayTags(data['tags']);
-  displayCircle(wouldTakeAgainPercent);
+function getStoredSchoolCode() {
+  const storedData = JSON.parse(localStorage.getItem('selectedSchool'));
+  return storedData ? storedData[1] : null;
+}
 
-  errorText.style.display = 'none';
+document.getElementById('submit-button').addEventListener('click', handleSubmit);
 
-  professorStats.textContent = `${data['firstName']} ${data['lastName']}'s Ratings`;
-  professorStatsDep.textContent = `Department of ${data['department']}`;
-  professorStatsNum.textContent = `${data['numRatings']} Ratings`;
+document.getElementById('swap-button').addEventListener('click', swapBtn);
 
-  professorStats.classList.remove('hidden');
-  professorStatsDep.classList.remove('hidden');
-  professorStatsNum.classList.remove('hidden');
-  resultSection.classList.remove('hidden');
-  loadingScreen.classList.add('hidden');
+document.getElementById('school-link').addEventListener('click', schoolBtn);
 
-});
-
-document.getElementById('school-link').addEventListener('click', () => {
-  document.getElementById('main-section').classList.add('hidden');
-  document.getElementById('school-section').classList.remove('hidden');
-});
-
-document.getElementById('back-button').addEventListener('click', () => {
-  document.getElementById('school-section').classList.add('hidden');
-  document.getElementById('main-section').classList.remove('hidden');
-});
+document.getElementById('back-button').addEventListener('click', returnBtn);
