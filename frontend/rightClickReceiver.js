@@ -1,13 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
-    chrome.storage.local.get(['firstName', 'lastName'], (result) => {
-        if (result.lastName) {
-            document.getElementById("last-name").value = result.lastName;
-        }
-        if (result.firstName && result.firstName.length > 0) {
-            document.getElementById("first-name").value = result.firstName;
-            document.getElementById("submit-button").click();
-        } else {
-            document.getElementById("first-name").value = "";
-        }
-    });
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    let firstNameInput = document.getElementById("first-name");
+    let lastNameInput = document.getElementById("last-name");
+    firstNameInput.value = request.firstName || "";
+    lastNameInput.value = request.lastName || "";
+    if (request.firstName && request.lastName) {
+        document.getElementById("submit-button").click();
+    }
 });

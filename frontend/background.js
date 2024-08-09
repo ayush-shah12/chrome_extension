@@ -7,7 +7,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-    if (info.menuItemId === "sendToRMP") {
+    if (info.menuItemId === "sendToRMP" && info.selectionText) {
         let selectedText = info.selectionText.trim();
         let names = selectedText.split(" ");
 
@@ -22,7 +22,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             firstName = firstName.replace(".", "");
         }
 
-        chrome.storage.local.set({ firstName, lastName });
-        chrome.action.openPopup();
+        chrome.action.openPopup(() => {
+            chrome.runtime.sendMessage({ firstName, lastName });
+        });
     }
 });
