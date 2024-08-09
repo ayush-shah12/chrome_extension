@@ -54,7 +54,7 @@ function isValidInput(firstName, lastName, storedCode, errorText) {
 }
 
 async function fetchProfessorData(firstName, lastName, storedCode) {
-  const response = await fetch(`http://127.0.0.1:8080/get_professor_info?prof_first_name=${firstName}&prof_last_name=${lastName}&school_code=${storedCode}`);
+  const response = await fetch(`https://chrome-extension-b286ba0227dc.herokuapp.com/get_professor_info?prof_first_name=${firstName}&prof_last_name=${lastName}&school_code=${storedCode}`);
   return response.json();
 }
 
@@ -68,9 +68,9 @@ function handleFetchError(data, errorText, err = null) {
 function updateUIWithProfessorData(data) {
   const wouldTakeAgainPercent = data.wouldTakeAgainPercent.toFixed(0);
   
-  document.querySelector('#rating-value').textContent = data.avgRating;
-  document.querySelector('#difficulty-value').textContent = data.avgDifficulty;
-  document.querySelector('#take-again-value').textContent = wouldTakeAgainPercent === "-1" ? "N/A" : wouldTakeAgainPercent;
+  document.getElementById('rating-value').textContent = data.avgRating;
+  document.getElementById('difficulty-value').textContent = data.avgDifficulty;
+  document.getElementById('take-again-value').textContent = wouldTakeAgainPercent === "-1" ? "N/A" : wouldTakeAgainPercent;
 
   localStorage.setItem('savedProfInfo', JSON.stringify({
     firstName: data.firstName,

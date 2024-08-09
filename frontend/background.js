@@ -1,9 +1,28 @@
-/* commenting out for now for publishing, will add back in later */
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.contextMenus.create({
+        id: "sendToRMP",
+        title: "Search this Professor",
+        contexts: ["selection"]
+    });
+});
 
-// chrome.runtime.onInstalled.addListener(() => {
-//     chrome.contextMenus.create({
-//       id: "textToPopup",
-//       title: "Send Name to RMP Assistant",
-//       contexts: ["selection"]
-//   });
-// });
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === "sendToRMP") {
+        let selectedText = info.selectionText.trim();
+        let names = selectedText.split(" ");
+
+        let firstName = "";
+        let lastName = "";
+
+        if (names.length === 1) {
+            lastName = names[0];
+        } else if (names.length >= 2) {
+            firstName = names[0];
+            lastName = names.slice(1).join(" ");
+            firstName = firstName.replace(".", "");
+        }
+
+        chrome.storage.local.set({ firstName, lastName });
+        chrome.action.openPopup();
+    }
+});
