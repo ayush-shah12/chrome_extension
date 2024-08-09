@@ -33,15 +33,19 @@ function displayComments(comments) {
   }
   
 function displayTags(tags) {
-    const tagsContainer = document.getElementById('tags');
-    tagsContainer.innerHTML = '';
+  if (tags.length === 0) {
+    tags.push("There are no top comments for this professor.")
+  }
+
+  const tagsContainer = document.getElementById('tags');
+  tagsContainer.innerHTML = '';
   
-    tags.forEach(tagText => {
-        const tagDiv = document.createElement('div');
-        tagDiv.className = 'tag';
-        tagDiv.textContent = tagText;
-        tagsContainer.appendChild(tagDiv);
-    });
+  tags.forEach(tagText => {
+    const tagDiv = document.createElement('div');
+    tagDiv.className = 'tag';
+    tagDiv.textContent = tagText;
+    tagsContainer.appendChild(tagDiv);
+  });
 }
 
 function displayCircle(wouldTakeAgainPercent) {
