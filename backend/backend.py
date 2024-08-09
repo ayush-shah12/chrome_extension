@@ -14,7 +14,7 @@ CORS(app)
 def get_data(school_code, prof_first, prof_last):
     url = "https://www.ratemyprofessors.com/graphql"
 
-    name = ""      
+    name = ""
 
     if prof_first != "" and prof_last != "":
         name = prof_first + " " + prof_last
