@@ -44,7 +44,7 @@ function initializeForm() {
 
 function isValidInput(firstName, lastName, storedCode, errorText) {
   if (!firstName && !lastName) {
-    displayError('PLEASE ENTER A VALID FIRST AND LAST NAME.', errorText);
+    displayError('PLEASE ENTER A VALID FIRST OR LAST NAME.', errorText);
     return false;
   } else if (!storedCode) {
     displayError('PLEASE SELECT A SCHOOL BEFORE BROWSING PROFESSORS.', errorText);

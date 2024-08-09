@@ -5,6 +5,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import os
+from rapidfuzz import fuzz
 
 app = Flask(__name__)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -194,6 +195,11 @@ def get_professor_info():
     prof_last_name = request.args.get('prof_last_name').lower()
     school_id = request.args.get('school_code')
 
+    if not prof_first_name:
+        prof_first_name = ""
+    if not prof_last_name:
+        prof_last_name = ""
+
     school_code = set_url(school_id)
 
     if school_code is None:
@@ -214,14 +220,57 @@ def get_professor_info():
             student_in = student_input(prof.get('legacyId'))
             prof['tags'] = student_in['tags']
             prof['userCards'] = student_in['userCards']
+            print(1)
             return jsonify(prof)
 
-        # matching first name OR last name ONLY if above clause didn't trigger
-        if prof.get('firstName').lower() == prof_first_name or prof.get(
-                'lastName').lower() == prof_last_name and prof.get('school').get('id') == str(school_code):
+        # fuzz ratio for last name only
+        if prof.get('firstName').lower() == prof_first_name.lower() and (
+                fuzz.ratio(prof.get('lastName').lower(), prof_last_name.lower()) > 70
+        ) and prof.get('school').get('id') == str(school_code):
             student_in = student_input(prof.get('legacyId'))
             prof['tags'] = student_in['tags']
             prof['userCards'] = student_in['userCards']
+            print(2)
+            return jsonify(prof)
+
+        # fuzz ratio for first name only
+        if fuzz.ratio(prof.get('firstName').lower(), prof_first_name.lower()) > 70 and (
+                prof.get('lastName').lower() == prof_last_name.lower()
+        ) and prof.get('school').get('id') == str(school_code):
+            student_in = student_input(prof.get('legacyId'))
+            prof['tags'] = student_in['tags']
+            prof['userCards'] = student_in['userCards']
+            print(3)
+            return jsonify(prof)
+
+        # fuzz ratio for first and last name
+        if fuzz.ratio(prof.get('firstName').lower(), prof_first_name.lower()) > 70 and (
+                fuzz.ratio(prof.get('lastName').lower(), prof_last_name.lower()) > 70
+        ) and prof.get('school').get('id') == str(school_code):
+            student_in = student_input(prof.get('legacyId'))
+            prof['tags'] = student_in['tags']
+            prof['userCards'] = student_in['userCards']
+            print(4)
+            return jsonify(prof)
+
+        # if either matches exactly, for when a user only inputs one
+        if (prof_first_name.lower() == prof.get('firstName').lower() or prof_last_name.lower() == prof.get('lastName').lower()) and prof.get('school').get('id') == str(school_code):
+            student_in = student_input(prof.get('legacyId'))
+            prof['tags'] = student_in['tags']
+            prof['userCards'] = student_in['userCards']
+            print(4)
+            return jsonify(prof)
+
+        # mainly for right click feature for when we have no reliable way of
+        # knowing whether a user who highlighted a one name, is a first or last
+        # name
+        if (fuzz.ratio(prof.get('firstName').lower(), prof_last_name.lower()) > 70 or (
+                fuzz.ratio(prof.get('lastName').lower(), prof_first_name.lower()) > 70
+        )) and prof.get('school').get('id') == str(school_code):
+            student_in = student_input(prof.get('legacyId'))
+            prof['tags'] = student_in['tags']
+            prof['userCards'] = student_in['userCards']
+            print(5)
             return jsonify(prof)
 
         # Check in the instance that the first name was abbreviated to only the first letter
@@ -230,6 +279,7 @@ def get_professor_info():
             student_in = student_input(prof.get('legacyId'))
             prof['tags'] = student_in['tags']
             prof['userCards'] = student_in['userCards']
+            print(6)
             return jsonify(prof)
 
     # Otherwise return error.
@@ -244,14 +294,6 @@ def set_url(school_id):
     return None
 
 
-def codeToName(school_id):
-    data = pd.read_csv("schools.csv")
-    for index, row in data.iterrows():
-        if row['School Code'] == school_id:
-            return row['School Name']
-    return None
-
-
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=port)
