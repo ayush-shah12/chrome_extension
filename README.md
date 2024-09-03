@@ -1,8 +1,6 @@
 
 # Rate My Professor Extension(Any University, Any Website)
 
-**Future versions are in branches!**
-
 Tired of juggling multiple RateMyProfessors tabs while planning your courses? Our Chrome extension is here to make your life easier!
 
 With just a few clicks, you can:
