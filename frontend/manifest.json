@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Rate My Professor Extension (Any University, Any Website)",
+  "version": "2.0",
+  "description": "Check infor about professors by simply inputting their name eliminating the need to switch tabs, or use our new right click feature!",
+  "permissions": ["contextMenus"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "images/default_icon16.png",
+    "48": "images/default_icon48.png",
+    "128": "images/default_icon.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["rightClickReceiver.js"]
+    }
+  ]
+}
