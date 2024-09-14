@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Rate My Professor Extension (Any University, Any Website)",
-  "version": "2.0",
-  "description": "Check infor about professors by simply inputting their name eliminating the need to switch tabs, or use our new right click feature!",
+  "version": "3.0",
+  "description": "Check info about professors by simply inputting their name eliminating the need to switch tabs, or use our new right click feature!",
   "permissions": ["contextMenus"],
   "action": {
     "default_popup": "popup.html"
