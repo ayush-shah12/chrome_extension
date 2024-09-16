@@ -59,7 +59,7 @@ jobs:
           name: loggingFrontendZipFile
       - name: Extract frontend.zip
         run: |
-          unzip loggingFrontendZipFile/frontend.zip -d extracted
+          unzip loggingFrontendZipFile.zip/frontend.zip -d extracted
       - name: Upload to Chrome Web Store
         uses: mobilefirstllc/cws-publish@latest
         with:
