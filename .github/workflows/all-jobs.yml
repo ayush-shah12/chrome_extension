@@ -45,7 +45,7 @@ jobs:
       - name: Upload to Chrome Web Store
         uses: mobilefirstllc/cws-publish@latest
         with:
-          action: 'upload'
+          action: 'publish'
           client_id: ${{ secrets.CLIENT_ID }}
           client_secret: ${{ secrets.SECRET }}
           refresh_token: ${{ secrets.REFRESH_TOKEN }}
@@ -55,26 +55,3 @@ jobs:
         with:
           name: loggingFrontendZipFile 
           path: frontend.zip
-  
-  # publish-chrome:
-  #   if: github.ref == 'refs/heads/master' && success() && github.event_name == 'push'   # only runs for master branch, if the previous jobs are successful and if the event is a push
-  #   runs-on: ubuntu-latest
-  #   needs: zip-files
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Download frontend.zip
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: loggingFrontendZipFile
-  #     - name: Extract frontend.zip
-  #       run: |
-  #         unzip loggingFrontendZipFile.zip/frontend.zip -d extracted
-  #     - name: Upload to Chrome Web Store
-  #       uses: mobilefirstllc/cws-publish@latest
-  #       with:
-  #         action: 'upload'
-  #         client_id: ${{ secrets.CLIENT_ID }}
-  #         client_secret: ${{ secrets.SECRET }}
-  #         refresh_token: ${{ secrets.REFRESH_TOKEN }}
-  #         extension_id: ${{ secrets.EXTENSION_ID }}
-  #         zip_file: frontend.zip
