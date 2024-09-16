@@ -53,6 +53,13 @@ jobs:
     needs: zip-files
     steps:
       - uses: actions/checkout@v4
+      - name: Download frontend.zip
+        uses: actions/download-artifact@v4
+        with:
+          name: loggingFrontendZipFile
+      - name: Extract frontend.zip
+        run: |
+          unzip loggingFrontendZipFile/frontend.zip -d extracted
       - name: Upload to Chrome Web Store
         uses: mobilefirstllc/cws-publish@latest
         with:
